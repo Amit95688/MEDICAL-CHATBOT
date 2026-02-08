@@ -1,0 +1,6 @@
+flask
+langchain
+sentence-transformers
+qdrant-client
+python-dotenv
+transformers
