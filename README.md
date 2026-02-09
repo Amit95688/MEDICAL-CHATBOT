@@ -2,7 +2,6 @@
 
 > Simple healthcare document retrieval using RAG over PubMed documents. Fast, easy to understand, and easy to debug.
 
-**Key Update:** Code simplified from 344 lines → 112 lines (66% reduction)
 
 ## Tech Stack
 
