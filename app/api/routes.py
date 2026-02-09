@@ -1,73 +1,34 @@
-"""
-API routes for the Medical RAG app.
-
-- /api/health     — health check
-- /api/query      — fast answer (retrieve only, default)
-- /api/query_full — full RAG with LLM (slower)
-- /api/summarize  — short summary of retrieved chunks
-"""
+"""Simple API routes for the Medical RAG app."""
 from flask import Blueprint, request, jsonify
-
-from app.rag.generator import query_fast, query_full_rag, query_summary
+from app.rag.generator import query
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
 
-def _get_question():
-    """Read question from JSON body or form."""
+def get_question():
+    """Get question from JSON body."""
     data = request.get_json(silent=True) or {}
-    q = data.get("question")
-    if not q and request.form:
-        q = request.form.get("question")
-    return (q or "").strip()
+    return (data.get("question") or "").strip()
 
 
 @api.route("/health", methods=["GET"])
 def health():
     """Health check."""
-    return jsonify({"status": "ok", "service": "medical-chatbot"})
+    print("Health check")
+    return jsonify({"status": "ok"})
 
 
 @api.route("/query", methods=["POST"])
-def query():
-    """
-    Fast answer: retrieve + format only (no LLM).
-    Quick and avoids device/GPU errors.
-    """
-    question = _get_question()
+def answer_question():
+    """Answer a medical question using retrieved documents."""
+    question = get_question()
     if not question:
-        return jsonify({"error": "Missing or empty 'question'"}), 400
+        return jsonify({"error": "Missing question"}), 400
+    
     try:
-        answer = query_fast(question)
+        print(f"Answering: {question}")
+        answer = query(question)
         return jsonify({"question": question, "answer": answer})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@api.route("/query_full", methods=["POST"])
-def query_full():
-    """
-    Full RAG: retrieve + LLM generation.
-    Slower; use when you need a generated answer.
-    """
-    question = _get_question()
-    if not question:
-        return jsonify({"error": "Missing or empty 'question'"}), 400
-    try:
-        answer = query_full_rag(question)
-        return jsonify({"question": question, "answer": answer})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@api.route("/summarize", methods=["POST"])
-def summarize():
-    """Short summary of retrieved chunks (no LLM)."""
-    question = _get_question()
-    if not question:
-        return jsonify({"error": "Missing or empty 'question'"}), 400
-    try:
-        summary = query_summary(question)
-        return jsonify({"question": question, "summary": summary})
-    except Exception as e:
+        print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
