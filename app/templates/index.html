@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Chatbot</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #0d47a1;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .hint {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #0d47a1;
+      box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.2);
+    }
+    button {
+      margin-top: 0.75rem;
+      padding: 0.6rem 1.25rem;
+      background: #0d47a1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #1565c0; }
+    button:disabled {
+      background: #90a4ae;
+      cursor: not-allowed;
+    }
+    #answer {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-top: 0.5rem;
+    }
+    .loading { color: #666; font-style: italic; }
+    .error { color: #c62828; }
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .footer a { color: #0d47a1; }
+  </style>
+</head>
+<body>
+  <h1>Medical Chatbot</h1>
+  <p class="subtitle">Ask a question based on PubMed-style medical context. Answers use retrieved chunks (fast mode).</p>
+  <p class="hint">First request may load the index (~30s). Later answers are quick. For LLM-generated answers use POST /api/query_full.</p>
+
+  <div class="card">
+    <label for="question">Your question</label>
+    <textarea id="question" placeholder="e.g. What are the symptoms and complications of diabetes?"></textarea>
+    <button type="button" id="ask">Ask</button>
+  </div>
+
+  <div class="card" id="result-card" style="display: none;">
+    <label>Answer</label>
+    <div id="answer"></div>
+  </div>
+
+  <p class="footer">
+    <a href="/api/health">Health</a> · POST /api/query (fast) · POST /api/query_full (LLM)
+  </p>
+
+  <script>
+    const questionEl = document.getElementById('question');
+    const askBtn = document.getElementById('ask');
+    const resultCard = document.getElementById('result-card');
+    const answerEl = document.getElementById('answer');
+
+    askBtn.addEventListener('click', async () => {
+      const question = (questionEl.value || '').trim();
+      if (!question) return;
+
+      askBtn.disabled = true;
+      resultCard.style.display = 'block';
+      answerEl.textContent = 'Loading…';
+      answerEl.className = 'loading';
+
+      try {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question }),
+        });
+        const data = await res.json();
+        answerEl.className = '';
+        if (res.ok) {
+          answerEl.textContent = data.answer || '(No answer returned.)';
+        } else {
+          answerEl.textContent = data.error || 'Request failed.';
+          answerEl.className = 'error';
+        }
+      } catch (err) {
+        answerEl.textContent = 'Error: ' + err.message;
+        answerEl.className = 'error';
+      }
+      askBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
