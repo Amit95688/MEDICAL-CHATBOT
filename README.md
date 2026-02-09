@@ -86,28 +86,6 @@ data/
 
 ---
 
-## What Changed
-
-### Code Reduction
-
-- **generator.py**: 183 → 23 lines (88% reduction)
-- **config.py**: 58 → 25 lines (57% reduction)  
-- **routes.py**: 70 → 34 lines (51% reduction)
-
-### Removed
-
-✂️ Complex LLM code (transformers, AutoModelForCausalLM)  
-✂️ Global caching bugs  
-✂️ LangChain RunnableChains  
-✂️ Multiple confusing endpoints  
-✂️ Environment variable parsing complexity  
-
-### Added
-
-✅ Debug output at every step  
-✅ Simple, readable code  
-✅ Linear code flow  
-✅ Clear error messages  
 
 ---
 
