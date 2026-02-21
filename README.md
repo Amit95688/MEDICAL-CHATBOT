@@ -5,7 +5,7 @@
 
 ## Tech Stack
 
-Python, Flask, LangChain, Sentence-Transformers, FAISS
+Python, Flask, LangChain, Sentence-Transformers, FAISS,Docker
 
 ---
 
